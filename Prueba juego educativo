@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Donación de Sangre</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #container {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease-in-out;
+        }
+        h2 {
+            color: #d9534f;
+        }
+        p {
+            font-size: 18px;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: opacity 0.5s ease-in-out;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+        .next {
+            background-color: #28a745;
+            color: white;
+        }
+        .next:hover {
+            transform: scale(1.1);
+        }
+        .restart {
+            background-color: #007bff;
+            color: white;
+        }
+        /* Barra de progreso */
+        .progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .progress {
+            width: 0%;
+            height: 10px;
+            background-color: #d9534f;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>Simulación de Donación de Sangre</h2>
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+        <img id="stepImage" src="https://via.placeholder.com/400" alt="Ilustración del paso">
+        <p id="text">Bienvenido a la simulación. ¿Quieres comenzar?</p>
+        <button class="next" onclick="showQuestions()">Comenzar</button>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "¿Tienes entre 18 y 65 años?", correct: true, image: "https://cdn-icons-png.flaticon.com/512/4080/4080032.png" },
+            { question: "¿Pesas más de 50 kg?", correct: true, image: "https://cdn-icons-png.flaticon.com/512/833/833595.png" },
+            { question: "¿Te sientes saludable hoy?", correct: true, image: "https://cdn-icons-png.flaticon.com/512/3772/3772711.png" },
+            { question: "¿Has donado sangre en los últimos 2 meses?", correct: false, image: "https://cdn-icons-png.flaticon.com/512/2761/2761349.png" },
+            { question: "¿Has consumido antibióticos en los últimos 7 días?", correct: false, image: "https://cdn-icons-png.flaticon.com/512/3043/3043893.png" }
+        ];
+
+        const donationTypes = [
+            { type: "Sangre Total", image: "https://cdn-icons-png.flaticon.com/512/1000/1000621.png" },
+            { type: "Plaquetas", image: "https://cdn-icons-png.flaticon.com/512/1019/1019702.png" },
+            { type: "Plasma", image: "https://cdn-icons-png.flaticon.com/512/1010/1010281.png" }
+        ];
+
+        const snacks = [
+            { snack: "Jugo y galletas", image: "https://cdn-icons-png.flaticon.com/512/826/826955.png" },
+            { snack: "Agua y barra energética", image: "https://cdn-icons-png.flaticon.com/512/1046/1046751.png" },
+            { snack: "Té y panecillo", image: "https://cdn-icons-png.flaticon.com/512/2922/2922389.png" }
+        ];
+
+        let questionIndex = 0;
+        let canDonate = true;
+
+        function showQuestions() {
+            if (questionIndex < questions.length) {
+                const q = questions[questionIndex];
+                document.getElementById("text").innerText = q.question;
+                document.getElementById("stepImage").src = q.image;
+                document.getElementById("container").innerHTML += `
+                    <button class="next" onclick="answerQuestion(true)">Sí</button>
+                    <button class="next" onclick="answerQuestion(false)">No</button>
+                `;
+            } else {
+                if (canDonate) {
+                    chooseDonationType();
+                } else {
+                    document.getElementById("container").innerHTML = `
+                        <h2>No puedes donar sangre</h2>
+                        <p>No cumples con los requisitos en este momento.</p>
+                        <button class="restart" onclick="restart()">Reiniciar</button>
+                    `;
+                }
+            }
+        }
+
+        function answerQuestion(answer) {
+            if (answer !== questions[questionIndex].correct) {
+                canDonate = false;
+            }
+            questionIndex++;
+            document.querySelectorAll("button").forEach(btn => btn.remove());
+            showQuestions();
+        }
+
+        function chooseDonationType() {
+            document.getElementById("text").innerText = "¿Qué tipo de donación deseas hacer?";
+            document.getElementById("stepImage").src = "https://cdn-icons-png.flaticon.com/512/4080/4080032.png";
+            document.getElementById("container").innerHTML = donationTypes.map(d => `
+                <button class="next" onclick="chooseSnack()">
+                    <img src="${d.image}" width="50"><br>${d.type}
+                </button>
+            `).join("");
+        }
+
+        function chooseSnack() {
+            document.getElementById("text").innerText = "Elige un refrigerio después de donar:";
+            document.getElementById("stepImage").src = "https://cdn-icons-png.flaticon.com/512/2334/2334561.png";
+            document.getElementById("container").innerHTML = snacks.map(s => `
+                <button class="next" onclick="finishSimulation()">
+                    <img src="${s.image}" width="50"><br>${s.snack}
+                </button>
+            `).join("");
+        }
+
+        function finishSimulation() {
+            document.getElementById("container").innerHTML = `
+                <h2>¡Gracias por tu donación! 😊</h2>
+                <p>Has completado la simulación.</p>
+                <button class="restart" onclick="restart()">Reiniciar</button>
+            `;
+        }
+
+        function restart() {
+            questionIndex = 0;
+            canDonate = true;
+            document.getElementById("container").innerHTML = `
+                <h2>Simulación de Donación de Sangre</h2>
+                <p>Bienvenido a la simulación. ¿Quieres comenzar?</p>
+                <button class="next" onclick="showQuestions()">Comenzar</button>
+            `;
+        }
+    </script>
+</body>
+</html>
